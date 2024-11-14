@@ -1,9 +1,9 @@
-# calls the frames folder
+# calls the chat_frames folder
 
 import tkinter as tk
 from tkinter import ttk
 from collections import deque
-from frames import Timer, Settings
+from pomodoro_frames import Timer, Settings
 try:
     from ctypes import windll
     windll.shcore.SetProcessDpiAwareness(1)

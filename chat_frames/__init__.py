@@ -1,0 +1,1 @@
+from chat_frames.chat import Chat
