@@ -1,7 +1,11 @@
 import tkinter as tk
 from tkinter import ttk, Image
-import requests, datetime
-from PIL import Image, ImageTk
+import requests
+from PIL.ImageOps import expand
+
+from chat_frames.message_window import MessageWindow
+
+
 try:
     from ctypes import windll
     windll.shcore.SetProcessDpiAwareness(1)
@@ -18,11 +22,21 @@ class Chat(ttk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
 
-        self.messages_frame = ttk.Frame(self)
-        self.messages_frame.grid(row=0, column=0, sticky="NSEW", pady=5)
+        self.message_window = MessageWindow(self)
+        self.message_window.grid(row=0, column=0, sticky="NSEW", pady=5)
 
         input_frame = ttk.Frame(self, padding=10)
         input_frame.grid(row=1, column=0, sticky="ew")
+
+        self.message_input = tk.Text(input_frame, height=3)
+        self.message_input.pack(expand=True, fill="both", side="left", padx=(0, 10))
+
+        message_submit = ttk.Button(
+            input_frame,
+            text="Send",
+            command=self.post_message
+        )
+        message_submit.pack()
 
         message_fetch = ttk.Button(
             input_frame,
@@ -30,64 +44,17 @@ class Chat(ttk.Frame):
             command=self.get_messages
         )
         message_fetch.pack()
+        self.message_window.update_message_widgets(messages, message_labels)
+
+    def post_message(self):
+        body = self.message_input.get("1.0", "end").strip()
+        requests.post("http://167.99.63.70/message", json={"message": body})
+        self.message_input.delete("1.0", "end")
+        self.get_messages()
 
     def get_messages(self):
         global messages
         messages = requests.get("http://167.99.63.70/messages").json()
-        self.update_message_widgets()
+        self.message_window.update_message_widgets(messages, message_labels)
+        self.after(150, lambda: self.message_window.yview_moveto(1.0))
 
-
-    def update_message_widgets(self):
-        existing_labels = [
-            (message["text"], time["text"]) for message, time in message_labels]
-
-        for message in messages:
-            message_time = datetime.datetime.fromtimestamp(message["date"]).strftime(
-                "%d-%m-%Y %H:%M:%S"
-            )
-            if (message["message"], message["date"]) not in existing_labels:
-                self._create_message_container(message["message"], message_time, message_labels)
-
-
-    def _create_message_container(self, message_content, message_time, message_labels):
-        container = ttk.Frame(self.messages_frame)
-        container.columnconfigure(1, weight=1)
-        container.grid(sticky="EW", padx=(10, 50), pady=10)
-
-        self._create_message_bubble(container, message_content, message_time, message_labels)
-
-
-    def _create_message_bubble(self, container, message_content, message_time, message_labels):
-        avatar_image = Image.open("./chat_assets/goofy_face.png")
-        avatar_photo = ImageTk.PhotoImage(avatar_image)
-
-        avatar_label = ttk.Label(
-            container,
-            image=avatar_photo
-        )
-        avatar_label.image = avatar_photo
-        avatar_label.grid(
-            row=0,
-            column=0,
-            rowspan=2,
-            sticky="NEW",
-            padx=(0, 10),
-            pady=(5, 0)
-        )
-
-        time_label = ttk.Label(
-            container,
-            text=message_time
-        )
-        time_label.grid(row=2, column=0, sticky="NEW")
-
-        message_label = ttk.Label(
-            container,
-            text=message_content,
-            anchor="w",
-            justify="left"
-        )
-
-        message_label.grid(row=1, column=1, sticky="NSEW")
-
-        message_labels.append((message_label, time_label))
