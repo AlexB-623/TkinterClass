@@ -9,7 +9,7 @@ class MessageWindow(tk.Canvas):
     def __init__(self, container, *args, **kwargs):
         super().__init__(container, *args, **kwargs, highlightthickness=0)
 
-        self.message_frame = ttk.Frame(self)
+        self.message_frame = ttk.Frame(self, style="Messages.TFrame")
         self.message_frame.columnconfigure(0, weight=1)
 
         self.scrollable_window = self.create_window((0, 0), window=self.message_frame, anchor="nw")
@@ -46,7 +46,7 @@ class MessageWindow(tk.Canvas):
 
 
     def _create_message_container(self, message_content, message_time, message_labels):
-        container = ttk.Frame(self.message_frame)
+        container = ttk.Frame(self.message_frame, style="Messages.TFrame")
         container.columnconfigure(1, weight=1)
         container.grid(sticky="EW", padx=(10, 50), pady=10)
 
@@ -65,7 +65,8 @@ class MessageWindow(tk.Canvas):
 
         avatar_label = ttk.Label(
             container,
-            image=avatar_photo
+            image=avatar_photo,
+            style="Avatar.TLabel"
         )
         avatar_label.image = avatar_photo
         avatar_label.grid(
@@ -79,7 +80,8 @@ class MessageWindow(tk.Canvas):
 
         time_label = ttk.Label(
             container,
-            text=message_time
+            text=message_time,
+            style="Time.TLabel"
         )
         time_label.grid(row=2, column=0, sticky="NEW")
 
@@ -88,7 +90,8 @@ class MessageWindow(tk.Canvas):
             text=message_content,
             wraplength=800,
             anchor="w",
-            justify="left"
+            justify="left",
+            style="Message.TLabel"
         )
 
         message_label.grid(row=1, column=1, sticky="NSEW")

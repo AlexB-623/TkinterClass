@@ -27,7 +27,11 @@ class Messenger(tk.Tk):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
 
-        self.chat_frame = Chat(self)
+        self.chat_frame = Chat(
+            self,
+            background=COLOR_LIGHT_BACKGROUND_1,
+            style="Messages.TFrame"
+        )
 
         self.chat_frame.grid(row=0, column=0, sticky="NSEW")
 
